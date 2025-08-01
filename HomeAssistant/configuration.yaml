@@ -1,0 +1,8 @@
+#Add this Lines for RemoteAccess Behind a Reverseproxy
+
+http:
+  use_x_forwarded_for: true
+  trusted_proxies:
+    - 127.0.0.1
+    - 172.30.33.0/24 # Your Network or ReverseProxy IP Address
+    - ::1
