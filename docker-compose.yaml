@@ -1,0 +1,156 @@
+x-shared-properties: &shared-properties
+  runtime: nvidia                 # Use NVIDIA runtime
+  init: false                     # Do not use init process
+  restart: unless-stopped         # Restart policy
+  network_mode: host              # Use host network mode, to auto-detect devices in network
+  devices:
+    - /dev/snd:/dev/snd           # to share audio devices
+    - /dev/bus/usb                # to share usb devices
+
+name: home-assistant-jetson
+services:
+  homeassistant:
+    image: ghcr.io/home-assistant/home-assistant:stable
+    <<: *shared-properties
+    container_name: homeassistant
+    hostname: homeassistant
+    ports:
+      - "8123:8123"
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    volumes:
+      - /docker/homeassistant/data/ha-config:/config
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+      - /var/run/dbus:/var/run/dbus:ro
+
+  assist-microphone:
+    image: dustynv/wyoming-assist-microphone:latest-r36.2.0
+    <<: *shared-properties
+    container_name: assist-microphone
+    hostname: assist-microphone
+    depends_on:
+      - homeassistant
+      - openwakeword
+    ports:
+      - "10700:10700/tcp"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+    environment:
+      SATELLITE_AUDIO_DEVICE: "plughw:CARD=S330,DEV=0"
+      SATELLITE_SND_VOLUME_MULTIPLIER: 0.3
+      ASSIST_PIPELINE_NAME: "Home Assistant"
+      WAKEWORD_NAME: ok_nabu
+
+  openwakeword:
+    image: dustynv/wyoming-openwakeword:latest-r36.2.0
+    <<: *shared-properties
+    container_name: openwakeword
+    hostname: openwakeword
+    depends_on:
+      - faster-whisper
+    ports:
+      - "10400:10400/tcp"
+    volumes:
+      - /docker/homeassistant/data/ha-openwakeword-custom-models:/share/openwakeword
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+    environment:
+      OPENWAKEWORD_CUSTOM_MODEL_DIR: /share/openwakeword
+      OPENWAKEWORD_PRELOAD_MODEL: ok_nabu
+
+  faster-whisper:
+    image: dustynv/wyoming-whisper:latest-r36.2.0
+    <<: *shared-properties
+    container_name: faster-whisper
+    hostname: faster-whisper
+    ports:
+      - "10300:10300/tcp"
+    volumes:
+      - /docker/homeassistant/data/ha-whisper-models:/share/whisper
+      - /docker/homeassistant/data/ha-whisper-data:/data
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+
+  piper-tts:
+    image: dustynv/wyoming-piper:master-r36.2.0
+    <<: *shared-properties
+    container_name: piper-tts
+    hostname: piper-tts
+    ports:
+      - "10200:10200/tcp"
+    volumes:
+      - /docker/homeassistant/data/ha-piper-tts-models:/data/models/piper
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+    environment:
+      PIPER_VOICE: "de_DE-ramona-low"
+
+#  speach-to-phrase:
+#    image: rhasspy/wyoming-speech-to-phrase
+#    depends_on:
+#      - homeassistant
+#    <<: *shared-properties
+#    container_name: speach-to-phrase
+#    hostname: speach-to-phrase
+#    ports: 
+#      - 10310:10310
+#    volumes:
+#      - /docker/homeassistant/data/speach2phrase:/models
+#      - /docker/homeassistant/data/speach2phrase:/train
+#    command:
+#      --hass-websocket-uri 'ws://10.11.1.2:8123/api/websocket'
+#      --hass-token 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiI5NmE2Y2YxNWZkN2Q0NDIyYmJlMzllZDMxMTY3MDM0ZSIsImlhdCI6MTc1NDAwMzMwMCwiZXhwIjoyMDY5MzYzMzAwfQ.xeiQx6tt-qxpMgZktOeSS_ZZ-sdXQt7B7XkrPnh6NUo'
+#      --retrain-on-start
+
+  music-assistant-server:
+    image: ghcr.io/music-assistant/server:latest # <<< Desired release version here (or use beta to get the latest beta version)
+    container_name: music-assistant-server
+    hostname: music-assistant-server
+    <<: *shared-properties
+    volumes:
+      - /docker/homeassistant/data/music-assistant-server/data:/data/
+    # privileged caps (and security-opt) needed to mount smb folders within the container
+    cap_add:
+      - SYS_ADMIN
+      - DAC_READ_SEARCH
+    security_opt:
+      - apparmor:unconfined
+    environment:
+      # Provide logging level as environment variable.
+      # default=info, possible=(critical, error, warning, info, debug)
+      - LOG_LEVEL=info
+
+  zigbee2mqtt:
+    container_name: zigbee2mqtt
+    hostname: zigbee2mqtt
+    image: ghcr.io/koenkk/zigbee2mqtt
+    <<: *shared-properties
+    depends_on:
+      - homeassistant
+    volumes:
+      - /docker/homeassistant/data/zigbee2mqtt:/app/data
+      - /run/udev:/run/udev:ro
+    ports:
+      # Frontend port
+      - 8081:8081
+    group_add:
+      - dialout
+    environment:
+      - TZ=Europe/Berlin
+    devices:
+      # Make sure this matched your adapter location
+      - /dev/ttyUSB0
+
+
+volumes:
+  ha-config:                      # Home Assistant configuration volume
+  ha-openwakeword-custom-models:  # Volume for OpenWakeWord custom models
+  ha-piper-tts-models:            # Volume for Piper TTS models
+  ha-whisper-models:              # Volume for Faster Whisper models
+  ha-whisper-data:                # Volume for Faster Whisper data
+  ha-music-assistant-server:      # Volume for Music Assistant
+  ha-zigbee2mqtt:                 # Volume for Zigbee2MQTT
+  #ha-speach-to-phrase:            # Volume for Speach2Phrase
