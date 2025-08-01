@@ -134,7 +134,6 @@ services:
       - /docker/homeassistant/data/mqtt5/config:/mosquitto/config:rw
       - /docker/homeassistant/data/mqtt5/:/mosquitto/data:rw
       - /docker/homeassistant/data/mqtt5/log:/mosquitto/log:rw
-    restart: unless-stopped
 
 
   zigbee2mqtt:
