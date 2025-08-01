@@ -96,7 +96,7 @@ services:
 #    container_name: speach-to-phrase
 #    hostname: speach-to-phrase
 #    ports: 
-#      - 10310:10310
+#      - 10800:10800
 #    volumes:
 #      - /docker/homeassistant/data/speach2phrase:/models
 #      - /docker/homeassistant/data/speach2phrase:/train
@@ -123,21 +123,36 @@ services:
       # default=info, possible=(critical, error, warning, info, debug)
       - LOG_LEVEL=info
 
+  mqtt5:
+    image: eclipse-mosquitto
+    container_name: mqtt5
+    <<: *shared-properties
+    ports:
+      - "1883:1883" #default mqtt port
+      - "9001:9001" #default mqtt port for websockets
+    volumes:
+      - /docker/homeassistant/data/mqtt5/config:/mosquitto/config:rw
+      - /docker/homeassistant/data/mqtt5/:/mosquitto/data:rw
+      - /docker/homeassistant/data/mqtt5/log:/mosquitto/log:rw
+    restart: unless-stopped
+
+
   zigbee2mqtt:
     container_name: zigbee2mqtt
     hostname: zigbee2mqtt
     image: ghcr.io/koenkk/zigbee2mqtt
     <<: *shared-properties
+    group_add:
+      - dialout
     depends_on:
       - homeassistant
+      - mqtt5
     volumes:
       - /docker/homeassistant/data/zigbee2mqtt:/app/data
       - /run/udev:/run/udev:ro
     ports:
       # Frontend port
-      - 8081:8081
-    group_add:
-      - dialout
+      - 8080:8080
     environment:
       - TZ=Europe/Berlin
     devices:
@@ -152,5 +167,6 @@ volumes:
   ha-whisper-models:              # Volume for Faster Whisper models
   ha-whisper-data:                # Volume for Faster Whisper data
   ha-music-assistant-server:      # Volume for Music Assistant
+  ha-mqtt5:                       # Volume for MQTT5 / Eclipse-Mosquitto
   ha-zigbee2mqtt:                 # Volume for Zigbee2MQTT
   #ha-speach-to-phrase:            # Volume for Speach2Phrase
