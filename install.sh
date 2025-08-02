@@ -8,8 +8,8 @@ sudo chown root -R /docker/homeassistant/data/mqtt5/
 sudo chgrp docker -R /docker/homeassistant/data/mqtt5/
 sudo touch /docker/homeassistant/data/mqtt5/config/pwfile
 sudo chmod 0700 /docker/homeassistant/data/mqtt5/config/pwfile
-sudo chown root -R /docker/homeassistant/data/mqtt5/config/pwfile
-sudo chgrp root -R /docker/homeassistant/data/mqtt5/config/pwfile
+sudo chown root /docker/homeassistant/data/mqtt5/config/pwfile
+sudo chgrp root /docker/homeassistant/data/mqtt5/config/pwfile
 
 
 
