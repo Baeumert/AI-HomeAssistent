@@ -1,6 +1,7 @@
 #/bin/bash
 
 #Script for install ang configuring HomeAssitant with AI
+cp mqtt5/config/mosquitto.conf /docker/homeassistant/data/mqtt5/config/mosquitto.conf
 
 echo "Please enter a Secure Password for the MQTT-User: homassistant"
 read -p "MQTT Password for HomeAssitant" hapassword
