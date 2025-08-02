@@ -5,8 +5,10 @@ docker compose pull
 mkdir -p /docker/homeassistant/data/mqtt5/config/
 sudo cp mqtt5/config/mosquitto.conf /docker/homeassistant/data/mqtt5/config/mosquitto.conf
 sudo touch /docker/homeassistant/data/mqtt5/config/pwfile
+sudo chmod 0700 /docker/homeassistant/data/mqtt5/config/pwfile
 sudo chown root -R /docker/homeassistant/data/mqtt5/
 sudo chgrp docker -R /docker/homeassistant/data/mqtt5/
+
 
 
 echo "Please enter a Secure Password for the MQTT-User: homassistant"
