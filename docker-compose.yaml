@@ -49,8 +49,8 @@ services:
     <<: *shared-properties
     container_name: openwakeword
     hostname: openwakeword
-    #depends_on:
-      #- faster-whisper
+    depends_on:
+      - faster-whisper
     ports:
       - "10400:10400/tcp"
     volumes:
@@ -61,33 +61,18 @@ services:
       OPENWAKEWORD_CUSTOM_MODEL_DIR: /share/openwakeword
       OPENWAKEWORD_PRELOAD_MODEL: ok_nabu
 
-#  faster-whisper:
-#    image: dustynv/wyoming-whisper:latest-r36.2.0
-#    <<: *shared-properties
-#    container_name: faster-whisper
-#    hostname: faster-whisper
-#    ports:
-#      - "10300:10300/tcp"
-#    volumes:
-#      - /docker/homeassistant/data/ha-whisper-models:/share/whisper
-#      - /docker/homeassistant/data/ha-whisper-data:/data
-#      - /etc/localtime:/etc/localtime:ro
-#      - /etc/timezone:/etc/timezone:ro
-
-  wyoming-whisper:
-    image: rhasspy/wyoming-whisper
+  faster-whisper:
+    image: dustynv/wyoming-whisper:latest-r36.2.0
     <<: *shared-properties
-    container_name: wyoming-whisper
-    hostname: wyoming-whisper
+    container_name: faster-whisper
+    hostname: faster-whisper
     ports:
       - "10300:10300/tcp"
     volumes:
-      - /docker/homeassistant/data/wyoming-whisper/data:/data
+      - /docker/homeassistant/data/ha-whisper-models:/share/whisper
+      - /docker/homeassistant/data/ha-whisper-data:/data
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro
-    command:
-       --model distil-large-v3
-       --language de
 
   piper-tts:
     image: dustynv/wyoming-piper:master-r36.2.0
@@ -102,23 +87,6 @@ services:
       - /etc/timezone:/etc/timezone:ro
     environment:
       PIPER_VOICE: "de_DE-ramona-low"
-
-#  speach-to-phrase:
-#    image: rhasspy/wyoming-speech-to-phrase
-#    depends_on:
-#      - homeassistant
-#    <<: *shared-properties
-#    container_name: speach-to-phrase
-#    hostname: speach-to-phrase
-#    ports: 
-#      - 10800:10800
-#    volumes:
-#      - /docker/homeassistant/data/speach2phrase:/models
-#      - /docker/homeassistant/data/speach2phrase:/train
-#    command:
-#      --hass-websocket-uri 'ws://10.11.1.2:8123/api/websocket'
-#      --hass-token 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiI5NmE2Y2YxNWZkN2Q0NDIyYmJlMzllZDMxMTY3MDM0ZSIsImlhdCI6MTc1NDAwMzMwMCwiZXhwIjoyMDY5MzYzMzAwfQ.xeiQx6tt-qxpMgZktOeSS_ZZ-sdXQt7B7XkrPnh6NUo'
-#      --retrain-on-start
 
   music-assistant-server:
     image: ghcr.io/music-assistant/server:latest # <<< Desired release version here (or use beta to get the latest beta version)
@@ -178,10 +146,8 @@ volumes:
   ha-config:                      # Home Assistant configuration volume
   ha-openwakeword-custom-models:  # Volume for OpenWakeWord custom models
   ha-piper-tts-models:            # Volume for Piper TTS models
-  #ha-whisper-models:              # Volume for Faster Whisper models
-  ha-wyoming-whisper:             # Volume for wyoming-whisper
+  ha-whisper-models:              # Volume for Faster Whisper models
   ha-whisper-data:                # Volume for Faster Whisper data
   ha-music-assistant-server:      # Volume for Music Assistant
   ha-mqtt5:                       # Volume for MQTT5 / Eclipse-Mosquitto
   ha-zigbee2mqtt:                 # Volume for Zigbee2MQTT
-  #ha-speach-to-phrase:            # Volume for Speach2Phrase
