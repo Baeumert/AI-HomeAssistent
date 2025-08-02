@@ -1,6 +1,8 @@
 #/bin/bash
 
 #Script for install ang configuring HomeAssitant with AI
+docker compose pull
+
 cp mqtt5/config/mosquitto.conf /docker/homeassistant/data/mqtt5/config/mosquitto.conf
 touch /docker/homeassistant/data/mqtt5/config/pwfile
 
