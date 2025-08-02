@@ -1,0 +1,15 @@
+services:
+  openwebui:
+    network_mode: host
+    runtime: nvidia
+    init: false
+    image: ghcr.io/open-webui/open-webui:main
+    ports:
+      - "3000:8081/tcp"
+    volumes:
+      - /docker/open-webui/data:/app/backend/data
+    restart: unless-stopped
+    environment:
+      - 'OLLAMA_BASE_URL=http://localhost:11434'
+volumes:
+  open-webui:
