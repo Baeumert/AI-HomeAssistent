@@ -20,6 +20,6 @@ read -p "MQTT Password for Zigbee2MQTT: "  z2mpassword
 echo "Please enter a Secure Password for the MQTT-User: iot"
 read -p "MQTT Password for IoT Devices: "  iotpassword
 
-docker exec -it mqtt5 mosquitto_passwd -H sha512-pbkdf2 -b /mosquitto/config/pwfile homassistant $homassistant
-docker exec -it mqtt5 mosquitto_passwd -H sha512-pbkdf2 -b /mosquitto/config/pwfile zigbee2mqtt $zigbee2mqtt
-docker exec -it mqtt5 mosquitto_passwd -H sha512-pbkdf2 -b /mosquitto/config/pwfile iot $iot
+docker exec mqtt5 mosquitto_passwd -H sha512-pbkdf2 -b /mosquitto/config/pwfile homassistant $homassistant
+docker exec mqtt5 mosquitto_passwd -H sha512-pbkdf2 -b /mosquitto/config/pwfile zigbee2mqtt $zigbee2mqtt
+docker exec mqtt5 mosquitto_passwd -H sha512-pbkdf2 -b /mosquitto/config/pwfile iot $iot
