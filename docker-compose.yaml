@@ -49,8 +49,8 @@ services:
     <<: *shared-properties
     container_name: openwakeword
     hostname: openwakeword
-    depends_on:
-      - faster-whisper
+    #depends_on:
+      #- faster-whisper
     ports:
       - "10400:10400/tcp"
     volumes:
@@ -61,18 +61,33 @@ services:
       OPENWAKEWORD_CUSTOM_MODEL_DIR: /share/openwakeword
       OPENWAKEWORD_PRELOAD_MODEL: ok_nabu
 
-  faster-whisper:
-    image: dustynv/wyoming-whisper:latest-r36.2.0
+#  faster-whisper:
+#    image: dustynv/wyoming-whisper:latest-r36.2.0
+#    <<: *shared-properties
+#    container_name: faster-whisper
+#    hostname: faster-whisper
+#    ports:
+#      - "10300:10300/tcp"
+#    volumes:
+#      - /docker/homeassistant/data/ha-whisper-models:/share/whisper
+#      - /docker/homeassistant/data/ha-whisper-data:/data
+#      - /etc/localtime:/etc/localtime:ro
+#      - /etc/timezone:/etc/timezone:ro
+
+  wyoming-whisper:
+    image: rhasspy/wyoming-whisper
     <<: *shared-properties
-    container_name: faster-whisper
-    hostname: faster-whisper
+    container_name: wyoming-whisper
+    hostname: wyoming-whisper
     ports:
       - "10300:10300/tcp"
     volumes:
-      - /docker/homeassistant/data/ha-whisper-models:/share/whisper
-      - /docker/homeassistant/data/ha-whisper-data:/data
+      - /docker/homeassistant/data/wyoming-whisper/data:/data
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro
+    command:
+       --model distil-large-v3
+       --language de
 
   piper-tts:
     image: dustynv/wyoming-piper:master-r36.2.0
@@ -163,7 +178,8 @@ volumes:
   ha-config:                      # Home Assistant configuration volume
   ha-openwakeword-custom-models:  # Volume for OpenWakeWord custom models
   ha-piper-tts-models:            # Volume for Piper TTS models
-  ha-whisper-models:              # Volume for Faster Whisper models
+  #ha-whisper-models:              # Volume for Faster Whisper models
+  ha-wyoming-whisper:             # Volume for wyoming-whisper
   ha-whisper-data:                # Volume for Faster Whisper data
   ha-music-assistant-server:      # Volume for Music Assistant
   ha-mqtt5:                       # Volume for MQTT5 / Eclipse-Mosquitto
