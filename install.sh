@@ -10,11 +10,11 @@ sudo chgrp docker -R /docker/homeassistant/data/mqtt5/
 
 
 echo "Please enter a Secure Password for the MQTT-User: homassistant"
-read -p "MQTT Password for HomeAssitant" hapassword
+read -p "MQTT Password for HomeAssitant: " hapassword
 echo "Please enter a Secure Password for the MQTT-User: zigbee2mqtt"
-read -p "MQTT Password for Zigbee2MQTT"  z2mpassword
+read -p "MQTT Password for Zigbee2MQTT: "  z2mpassword
 echo "Please enter a Secure Password for the MQTT-User: iot"
-read -p "MQTT Password for IoT Devices"  iotpassword
+read -p "MQTT Password for IoT Devices: "  iotpassword
 
 docker -it exec mqtt5 mosquitto_passwd /mosquitto/config/pwfile homassistant
 docker -it exec mqtt5 mosquitto_passwd /mosquitto/config/pwfile zigbee2mqtt
